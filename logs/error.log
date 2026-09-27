@@ -1,0 +1,144 @@
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $inisial in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 48
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $daftar_tahun in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 60
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $total_lunas in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 83
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $total_dibayar in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 88
+[25-Sep-2026 06:54:17 UTC] PHP Warning:  Undefined variable $riwayat in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:54:17 UTC] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in D:\www\pembayaran_spp\frontend\includes\data_spp.php:89
+Stack trace:
+#0 D:\www\pembayaran_spp\frontend\cek_spp.php(15): require_once()
+#1 {main}
+  thrown in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $inisial in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 48
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $daftar_tahun in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 60
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $total_lunas in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 83
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $total_dibayar in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 88
+[25-Sep-2026 06:54:44 UTC] PHP Warning:  Undefined variable $riwayat in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:54:44 UTC] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in D:\www\pembayaran_spp\frontend\includes\data_spp.php:89
+Stack trace:
+#0 D:\www\pembayaran_spp\frontend\cek_spp.php(15): require_once()
+#1 {main}
+  thrown in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $inisial in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 48
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $daftar_tahun in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 60
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $total_lunas in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 83
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $total_dibayar in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 88
+[25-Sep-2026 06:55:36 UTC] PHP Warning:  Undefined variable $riwayat in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:55:36 UTC] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in D:\www\pembayaran_spp\frontend\includes\data_spp.php:89
+Stack trace:
+#0 D:\www\pembayaran_spp\frontend\cek_spp.php(15): require_once()
+#1 {main}
+  thrown in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $inisial in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 48
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $daftar_tahun in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 60
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $total_lunas in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 83
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $total_dibayar in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 88
+[25-Sep-2026 06:55:44 UTC] PHP Warning:  Undefined variable $riwayat in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:55:44 UTC] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in D:\www\pembayaran_spp\frontend\includes\data_spp.php:89
+Stack trace:
+#0 D:\www\pembayaran_spp\frontend\cek_spp.php(15): require_once()
+#1 {main}
+  thrown in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $inisial in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 48
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $daftar_tahun in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 60
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $total_lunas in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 83
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $total_dibayar in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 88
+[25-Sep-2026 06:56:34 UTC] PHP Warning:  Undefined variable $riwayat in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 06:56:34 UTC] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in D:\www\pembayaran_spp\frontend\includes\data_spp.php:89
+Stack trace:
+#0 D:\www\pembayaran_spp\frontend\cek_spp.php(15): require_once()
+#1 {main}
+  thrown in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 18
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $inisial in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 48
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 50
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 52
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 53
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 54
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $siswa in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Trying to access array offset on value of type null in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 55
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $daftar_tahun in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 60
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $total_lunas in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 83
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $total_dibayar in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 88
+[25-Sep-2026 14:42:18 UTC] PHP Warning:  Undefined variable $riwayat in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89
+[25-Sep-2026 14:42:18 UTC] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in D:\www\pembayaran_spp\frontend\includes\data_spp.php:89
+Stack trace:
+#0 D:\www\pembayaran_spp\frontend\cek_spp.php(15): require_once()
+#1 {main}
+  thrown in D:\www\pembayaran_spp\frontend\includes\data_spp.php on line 89

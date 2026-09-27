@@ -75,7 +75,7 @@ function labelStatusSpp()
 {
     return [
         'lunas'    => ['Lunas', 'bln-lunas', 'bi-check-circle-fill'],
-        'tunggak'  => ['Menunggak', 'bln-tunggak', 'bi-exclamation-circle-fill'],
+        'tunggak'  => ['Tunggakan', 'bln-tunggak', 'bi-exclamation-circle-fill'],
         'jalan'    => ['Bulan berjalan', 'bln-jalan', 'bi-record-circle'],
         'depan'    => ['Belum tiba', 'bln-depan', 'bi-dash-circle'],
         'sebagian' => ['Terbayar sebagian', 'bln-sebagian', 'bi-hourglass-split'],

@@ -41,17 +41,31 @@ while ($s = mysqli_fetch_assoc($q_semua_siswa)) {
     $tingkat = (int) $s['tingkat'];
     // Kelas 10 -> 1 tahun ajaran, 11 -> 2 tahun, 12 -> 3 tahun
     $jumlah_tahun = max($tingkat - 9, 1);
-    $tahun_untuk_siswa = array_slice($tahun_nominal, 0, $jumlah_tahun, true);
+    // FIX: sebelumnya ambil N tahun PALING BARU dari tabel spp (array_slice),
+    // padahal kalau di tabel spp sudah ada nominal untuk tahun-tahun depan
+    // (2026, 2027, dst) itu bikin tahun yang dicek jadi salah sasaran -
+    // bukan tahun yang benar-benar dijalani siswa. Sekarang dihitung mundur
+    // dari tahun ajaran aktif sekarang, sesuai jumlah tahun siswa itu sudah sekolah.
+    $tahun_untuk_siswa = [];
+    for ($i = 0; $i < $jumlah_tahun; $i++) {
+        $th = $tahun_ajaran_aktif - $i;
+        if (isset($tahun_nominal[$th])) {
+            $tahun_untuk_siswa[$th] = $tahun_nominal[$th];
+        }
+    }
 
     $total_wajib  = $jumlah_tahun * 12;
     $jumlah_lunas = 0;
 
     foreach ($tahun_untuk_siswa as $tahun => $nominal) {
+        // FIX: kolom tahun_dibayar di tabel pembayaran disimpan dalam format
+        // "2025/2026" (bukan cuma "2025"), jadi pakai LIKE 'tahun%' supaya
+        // tetap cocok baik format "2025" maupun "2025/2026".
         $q_bayar = mysqli_query($koneksi, "
             SELECT bulan_dibayar, SUM(jumlah_bayar) AS total
             FROM pembayaran
             WHERE nisn = '" . mysqli_real_escape_string($koneksi, $s['nisn']) . "'
-              AND tahun_dibayar = '$tahun'
+              AND tahun_dibayar LIKE '" . mysqli_real_escape_string($koneksi, $tahun) . "%'
             GROUP BY bulan_dibayar
         ");
         $bayar_per_bulan = [];

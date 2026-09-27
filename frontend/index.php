@@ -26,11 +26,6 @@ if ($q1) { $total_siswa = (int) mysqli_fetch_assoc($q1)['n']; }
 $q2 = mysqli_query($koneksi, "SELECT COUNT(*) AS n FROM pembayaran");
 if ($q2) { $total_transaksi = (int) mysqli_fetch_assoc($q2)['n']; }
 
-// Kalau admin/petugas sedang login, tombol atas diganti jadi "Dashboard"
-$level_staf = $_SESSION['level'] ?? '';
-$staf_login = in_array($level_staf, ['admin', 'petugas'], true);
-$url_dashboard = ($level_staf === 'admin') ? '../backend/admin/index.php' : 'petugas/index.php';
-
 // Kalau siswa masih punya sesi cek status yang aktif
 $siswa_aktif = !empty($_SESSION['siswa_nisn']);
 
@@ -43,6 +38,7 @@ function formatTA($tahun) { $t = (int) $tahun; return $t . '/' . ($t + 1); }
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SPP Digital — Cek Status Pembayaran SPP</title>
 <meta name="description" content="Cek status pembayaran SPP per bulan, tunggakan, dan riwayat kuitansi dengan NISN dan NIS.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2248%22%20fill%3D%22%23DB2777%22/%3E%3Crect%20x%3D%2230%22%20y%3D%2220%22%20width%3D%2240%22%20height%3D%2260%22%20rx%3D%226%22%20fill%3D%22%23ffffff%22/%3E%3Crect%20x%3D%2237%22%20y%3D%2230%22%20width%3D%2226%22%20height%3D%224%22%20rx%3D%222%22%20fill%3D%22%23DB2777%22/%3E%3Crect%20x%3D%2237%22%20y%3D%2240%22%20width%3D%2226%22%20height%3D%224%22%20rx%3D%222%22%20fill%3D%22%23f9a8d4%22/%3E%3Crect%20x%3D%2237%22%20y%3D%2250%22%20width%3D%2218%22%20height%3D%224%22%20rx%3D%222%22%20fill%3D%22%23f9a8d4%22/%3E%3Ccircle%20cx%3D%2263%22%20cy%3D%2266%22%20r%3D%2212%22%20fill%3D%22%23DB2777%22/%3E%3Cpath%20d%3D%22M58%2066%20L61.5%2069.5%20L68.5%2062.5%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20fill%3D%22none%22/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com" rel="preconnect">
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
@@ -60,11 +56,6 @@ function formatTA($tahun) { $t = (int) $tahun; return $t . '/' . ($t + 1); }
         <i class="bi bi-file-earmark-text-fill fs-3" style="color:#DB2777"></i>
         <h1 class="sitename ms-2 mb-0">SPP Digital</h1>
       </a>
-      <?php if ($staf_login): ?>
-        <a href="<?= htmlspecialchars($url_dashboard); ?>" class="btn btn-pink rounded-pill px-4">Buka Dashboard</a>
-      <?php else: ?>
-        <a href="../login.php" class="btn btn-outline-secondary rounded-pill px-4">Masuk Petugas</a>
-      <?php endif; ?>
     </div>
   </header>
 

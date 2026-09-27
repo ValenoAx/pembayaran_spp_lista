@@ -102,7 +102,41 @@ if ($jenis === 'siswa') {
     $rata_rata = count($data) > 0 ? $total_bayar_keseluruhan / count($data) : 0;
 }
 
-// Query string buat tombol "Download PDF" nanti (bawa filter yang sama)
+/* ============================================================
+   PAGINASI TABEL
+
+   Ini CUMA buat tampilan tabelnya. Variabel $data yang asli (lengkap,
+   semua baris) tetap dipakai apa adanya buat:
+   - kartu statistik di atas (Total Siswa/Transaksi, Total Dana Masuk, dst)
+   - tombol Download PDF (lewat $query_pdf, tidak ikut bawa parameter
+     halaman, jadi PDF-nya tetap isi semua data)
+
+   $data_halaman_ini isinya cuma potongan 10 baris sesuai halaman yang
+   lagi dibuka, dipakai gantinya $data pas nge-loop <tbody> tabel.
+   ============================================================ */
+$per_halaman = 50;
+$halaman = isset($_GET['halaman']) ? max(1, (int) $_GET['halaman']) : 1;
+$total_data = count($data);
+$total_halaman = max(1, (int) ceil($total_data / $per_halaman));
+if ($halaman > $total_halaman) {
+    $halaman = $total_halaman;
+}
+$offset = ($halaman - 1) * $per_halaman;
+$data_halaman_ini = array_slice($data, $offset, $per_halaman);
+
+// Bikin link ke nomor halaman tertentu, sambil bawa filter (jenis/tingkat/tahun) yang sama
+function linkHalaman($h)
+{
+    global $jenis, $tingkat, $tahun;
+    return 'hasil_laporan.php?' . http_build_query([
+        'jenis'   => $jenis,
+        'tingkat' => $tingkat,
+        'tahun'   => $tahun,
+        'halaman' => $h,
+    ]);
+}
+
+// Query string buat tombol "Download PDF" (bawa filter yang sama, TANPA halaman -> selalu semua data)
 $query_pdf = http_build_query(['jenis' => $jenis, 'tingkat' => $tingkat, 'tahun' => $tahun]);
 
 include '../components/header.php';
@@ -240,9 +274,9 @@ include '../components/sidebar.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($data as $i => $s): ?>
+                        <?php foreach ($data_halaman_ini as $i => $s): ?>
                         <tr>
-                            <td><?= $i + 1; ?></td>
+                            <td><?= $offset + $i + 1; ?></td>
                             <td><?= htmlspecialchars($s['nisn']); ?></td>
                             <td><?= htmlspecialchars($s['nis']); ?></td>
                             <td class="fw-semibold"><?= htmlspecialchars($s['nama']); ?></td>
@@ -265,9 +299,9 @@ include '../components/sidebar.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($data as $i => $p): ?>
+                        <?php foreach ($data_halaman_ini as $i => $p): ?>
                         <tr>
-                            <td><?= $i + 1; ?></td>
+                            <td><?= $offset + $i + 1; ?></td>
                             <td><?= date('d-m-Y', strtotime($p['tgl_bayar'])); ?></td>
                             <td class="fw-semibold"><?= htmlspecialchars($p['nama']); ?></td>
                             <td><span class="badge" style="background-color:#fbcfe8; color:#9d174d;"><?= htmlspecialchars($p['tingkat'] . ' ' . $p['jurusan']); ?></span></td>
@@ -278,6 +312,32 @@ include '../components/sidebar.php';
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
+            <?php endif; ?>
+
+            <?php if (count($data) > 0 && $total_halaman > 1): ?>
+                <!-- NOMOR HALAMAN -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                    <div class="small text-muted">
+                        Menampilkan <?= $offset + 1; ?>–<?= min($offset + $per_halaman, $total_data); ?> dari <?= $total_data; ?> data
+                    </div>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item <?= ($halaman <= 1) ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?= htmlspecialchars(linkHalaman(max(1, $halaman - 1))); ?>">&laquo;</a>
+                            </li>
+                            <?php for ($h = 1; $h <= $total_halaman; $h++): ?>
+                                <li class="page-item <?= ($h === $halaman) ? 'active' : ''; ?>">
+                                    <a class="page-link <?= ($h === $halaman) ? 'text-white' : ''; ?>"
+                                       style="<?= ($h === $halaman) ? 'background-color:#db2777; border-color:#db2777;' : 'color:#db2777;'; ?>"
+                                       href="<?= htmlspecialchars(linkHalaman($h)); ?>"><?= $h; ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            <li class="page-item <?= ($halaman >= $total_halaman) ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?= htmlspecialchars(linkHalaman(min($total_halaman, $halaman + 1))); ?>">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             <?php endif; ?>
         </div>

@@ -16,18 +16,27 @@ include '../components/sidebar.php';
    HISTORY STATUS PEMBAYARAN SISWA (versi ringkas per siswa)
 
    1 baris per siswa, dengan ringkasan:
-   - Berapa bulan yang sudah tercatat dibayar (progress bar dari 36 bulan)
+   - Berapa bulan yang sudah tercatat dibayar (progress bar)
    - Tahun ajaran apa saja yang sudah ada transaksinya (badge ditumpuk)
    - Tombol "Lihat Detail" -> ke detail_history.php
 
    Ditambahkan juga kotak pencarian nama/NISN (filter di sisi
-   browser, tanpa reload halaman) + kartu ringkasan di atas tabel.
+   browser, tanpa reload halaman) + kartu ringkasan di atas tabel
+   + PAGINATION (maks 10 baris per halaman, sisanya di halaman
+   berikutnya), sama polanya kayak di Dashboard.
 
    Catatan: fungsi formatTA() sekarang ada di koneksi.php, jadi
    tidak perlu didefinisikan lagi di sini.
+
+   PERBAIKAN: total bulan wajib per siswa TIDAK selalu 36.
+   Siswa kelas 10 baru jalan 1 tahun ajaran (12 bulan), kelas 11
+   sudah 2 tahun ajaran (24 bulan), kelas 12 sudah 3 tahun ajaran
+   (36 bulan). Dihitung lewat totalBulanWajib($tingkat) supaya
+   sama logikanya dengan halaman Dashboard.
    ============================================================ */
 
-const TOTAL_BULAN_WAJIB = 36; // 12 bulan x 3 tahun ajaran
+// Dipakai buat label "maksimal" di kartu ringkasan saja (siswa kelas 12)
+const TOTAL_BULAN_WAJIB_MAKSIMAL = 36; // 12 bulan x 3 tahun ajaran
 
 // Palet warna pastel buat avatar inisial, dipilih gantian per siswa
 $PALET_AVATAR = [
@@ -55,6 +64,21 @@ function warnaAvatar($nama, $palet)
     return $palet[$indeks];
 }
 
+/**
+ * Total bulan wajib bayar buat satu siswa, berdasarkan tingkat kelasnya
+ * sekarang. Kelas 10 = baru 1 tahun ajaran (12 bulan), kelas 11 = 2 tahun
+ * ajaran (24 bulan), kelas 12 = 3 tahun ajaran (36 bulan).
+ *
+ * min(3, ...) & max(1, ...) cuma jaga-jaga kalau suatu saat ada data
+ * tingkat yang aneh/di luar 10-12, supaya tidak error atau hasilnya 0.
+ */
+function totalBulanWajib($tingkat)
+{
+    $tahunAjaranBerjalan = ((int) $tingkat) - 9;
+    $tahunAjaranBerjalan = max(1, min(3, $tahunAjaranBerjalan));
+    return $tahunAjaranBerjalan * 12;
+}
+
 $query = mysqli_query($koneksi, "
     SELECT
         siswa.nisn,
@@ -75,14 +99,28 @@ $query = mysqli_query($koneksi, "
 $semua_baris = [];
 if ($query && mysqli_num_rows($query) > 0) {
     while ($r = mysqli_fetch_assoc($query)) {
+        // Hitung sekali di sini, dipakai lagi di tabel supaya tidak dobel hitung
+        $r['bulan_wajib'] = totalBulanWajib($r['tingkat']);
         $semua_baris[] = $r;
     }
 }
+
+// Urutkan berdasarkan PERSENTASE pembayaran (paling kecil dulu), bukan jumlah
+// bulan mentah -- soalnya siswa kelas 10 wajibnya cuma 12 bulan, jadi jumlah
+// bulan kecil belum tentu persentasenya juga kecil dibanding siswa kelas 12.
+usort($semua_baris, function ($a, $b) {
+    $persenA = $a['bulan_wajib'] > 0 ? $a['jumlah_transaksi'] / $a['bulan_wajib'] : 0;
+    $persenB = $b['bulan_wajib'] > 0 ? $b['jumlah_transaksi'] / $b['bulan_wajib'] : 0;
+    if ($persenA == $persenB) {
+        return strcmp($a['nama'], $b['nama']); // persentase sama -> urut nama biar konsisten
+    }
+    return ($persenA < $persenB) ? -1 : 1;
+});
 $total_siswa = count($semua_baris);
 $total_bulan_semua = array_sum(array_column($semua_baris, 'jumlah_transaksi'));
 $rata_rata_bulan = $total_siswa > 0 ? round($total_bulan_semua / $total_siswa, 1) : 0;
 $jumlah_lunas_penuh = count(array_filter($semua_baris, function ($r) {
-    return (int) $r['jumlah_transaksi'] >= TOTAL_BULAN_WAJIB;
+    return (int) $r['jumlah_transaksi'] >= $r['bulan_wajib'];
 }));
 ?>
 
@@ -113,7 +151,7 @@ $jumlah_lunas_penuh = count(array_filter($semua_baris, function ($r) {
                     <div class="ikon-ringkasan" style="background:#c7d2fe;">📊</div>
                     <div>
                         <div class="small text-muted">Rata-rata Bulan Lunas</div>
-                        <div class="h4 fw-bold mb-0" style="color:#4338ca;"><?= $rata_rata_bulan; ?> <span class="fs-6 fw-normal text-muted">/ <?= TOTAL_BULAN_WAJIB; ?></span></div>
+                        <div class="h4 fw-bold mb-0" style="color:#4338ca;"><?= $rata_rata_bulan; ?></div>
                     </div>
                 </div>
             </div>
@@ -165,8 +203,9 @@ $jumlah_lunas_penuh = count(array_filter($semua_baris, function ($r) {
                             foreach ($semua_baris as $row):
                                 $nama_cari = strtolower($row['nama'] . ' ' . $row['nisn']);
                                 $jml = (int) $row['jumlah_transaksi'];
-                                $persen = min(100, round($jml / TOTAL_BULAN_WAJIB * 100));
-                                $lunas_penuh = $jml >= TOTAL_BULAN_WAJIB;
+                                $wajib = $row['bulan_wajib'];
+                                $persen = min(100, round($jml / $wajib * 100));
+                                $lunas_penuh = $jml >= $wajib;
 
                                 if ($persen >= 100) { $warna_progress = '#16a34a'; }
                                 elseif ($persen >= 60) { $warna_progress = '#65a30d'; }
@@ -186,7 +225,7 @@ $jumlah_lunas_penuh = count(array_filter($semua_baris, function ($r) {
                                 }
                         ?>
                             <tr data-cari="<?= htmlspecialchars($nama_cari); ?>">
-                                <td class="text-muted"><?= $no++; ?></td>
+                                <td class="text-muted kolom-no"><?= $no++; ?></td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="avatar-inisial" style="background:<?= $avatar['bg']; ?>; color:<?= $avatar['fg']; ?>;">
@@ -204,7 +243,7 @@ $jumlah_lunas_penuh = count(array_filter($semua_baris, function ($r) {
                                 <td>
                                     <div class="d-flex justify-content-between small mb-1">
                                         <span class="fw-semibold" style="color:<?= $warna_progress; ?>;">
-                                            <?= $jml; ?> bulan<?= $lunas_penuh ? ' 🎉' : ''; ?>
+                                            <?= $jml; ?>/<?= $wajib; ?> bulan<?= $lunas_penuh ? ' 🎉' : ''; ?>
                                         </span>
                                         <span class="text-muted"><?= $persen; ?>%</span>
                                     </div>
@@ -233,6 +272,7 @@ $jumlah_lunas_penuh = count(array_filter($semua_baris, function ($r) {
                 <div style="font-size:2rem;">🔍</div>
                 Tidak ada siswa yang cocok dengan pencarian.
             </div>
+            <nav class="mt-3" id="paginasi-history"></nav>
         </div>
     </div>
 </main>
@@ -306,26 +346,93 @@ $jumlah_lunas_penuh = count(array_filter($semua_baris, function ($r) {
     .btn-lihat-detail:hover {
         background: #9d174d; color: #fff; transform: scale(1.04);
     }
+
+    /* ================== pagination (sama pola kayak Dashboard) ================== */
+    .pg-btn {
+        border: none; background: #fff; color: #9d174d;
+        padding: 5px 12px; border-radius: 8px; font-size: .82rem; font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0,0,0,.06);
+    }
+    .pg-btn.aktif { background: #db2777; color: #fff; }
+    .pg-btn:disabled { opacity: .4; cursor: default; }
 </style>
 
 <script>
+    // ================== Live search + pagination "History Status Siswa" (tanpa reload halaman) ==================
     (function () {
-        var input = document.getElementById('cari-siswa');
-        var baris = document.querySelectorAll('#tabel-history tbody tr[data-cari]');
-        var pesanKosong = document.getElementById('tidak-ditemukan');
+        var input          = document.getElementById('cari-siswa');
+        var semuaBaris      = Array.from(document.querySelectorAll('#tabel-history tbody tr[data-cari]'));
+        var pesanKosong     = document.getElementById('tidak-ditemukan');
+        var kontainerPage   = document.getElementById('paginasi-history');
+        if (!input || semuaBaris.length === 0) return;
 
-        input.addEventListener('input', function () {
-            var kata = this.value.trim().toLowerCase();
-            var adaYangCocok = false;
+        var PER_HALAMAN  = 10;
+        var halamanAktif = 1;
 
-            baris.forEach(function (tr) {
-                var cocok = tr.dataset.cari.indexOf(kata) !== -1;
-                tr.style.display = cocok ? '' : 'none';
-                if (cocok) adaYangCocok = true;
+        function ambilYangCocok() {
+            var kata = input.value.trim().toLowerCase();
+            return semuaBaris.filter(function (tr) {
+                return kata === '' || tr.dataset.cari.indexOf(kata) !== -1;
+            });
+        }
+
+        function render() {
+            var cocok = ambilYangCocok();
+            var totalHalaman = Math.max(1, Math.ceil(cocok.length / PER_HALAMAN));
+            if (halamanAktif > totalHalaman) halamanAktif = totalHalaman;
+            if (halamanAktif < 1) halamanAktif = 1;
+
+            var mulai = (halamanAktif - 1) * PER_HALAMAN;
+            var akhir  = mulai + PER_HALAMAN;
+
+            // Sembunyikan semua dulu, lalu tampilkan cuma yang cocok & di halaman aktif
+            semuaBaris.forEach(function (tr) { tr.style.display = 'none'; });
+            cocok.slice(mulai, akhir).forEach(function (tr, i) {
+                tr.style.display = '';
+                var selNo = tr.querySelector('.kolom-no');
+                if (selNo) selNo.textContent = mulai + i + 1;
             });
 
-            pesanKosong.style.display = (kata !== '' && !adaYangCocok) ? 'block' : 'none';
+            pesanKosong.style.display = (cocok.length === 0) ? 'block' : 'none';
+
+            // Render tombol halaman
+            kontainerPage.innerHTML = '';
+            if (totalHalaman > 1) {
+                var ul = document.createElement('ul');
+                ul.className = 'pagination pagination-sm justify-content-center mb-0';
+
+                function buatTombol(label, halaman, nonaktif, aktif) {
+                    var li = document.createElement('li');
+                    li.className = 'page-item';
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'pg-btn' + (aktif ? ' aktif' : '');
+                    btn.textContent = label;
+                    btn.disabled = !!nonaktif;
+                    btn.addEventListener('click', function () {
+                        halamanAktif = halaman;
+                        render();
+                    });
+                    li.appendChild(btn);
+                    ul.appendChild(li);
+                }
+
+                buatTombol('«', halamanAktif - 1, halamanAktif <= 1, false);
+                for (var i = 1; i <= totalHalaman; i++) {
+                    buatTombol(i, i, false, i === halamanAktif);
+                }
+                buatTombol('»', halamanAktif + 1, halamanAktif >= totalHalaman, false);
+
+                kontainerPage.appendChild(ul);
+            }
+        }
+
+        input.addEventListener('input', function () {
+            halamanAktif = 1; // reset ke halaman 1 tiap kali kata kunci berubah
+            render();
         });
+
+        render(); // tampilan awal
     })();
 </script>
 

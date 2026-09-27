@@ -103,6 +103,19 @@ include __DIR__ . '/components/sidebar.php';
         Pembayaran berhasil disimpan<?= $satu_transaksi ? '' : ' untuk ' . count($daftar_transaksi) . ' bulan sekaligus'; ?>.
         Silakan cetak kuitansinya untuk siswa.
     </div>
+    <script>
+        // Muter suara notif sekali aja pas halaman ini kebuka gara-gara pembayaran baru
+        // disimpan (baru=1 di URL). Dibungkus try/catch + .catch() supaya kalau browser
+        // nolak autoplay suara (kebijakan sebagian browser), halaman tidak error.
+        (function () {
+            try {
+                var audioSukses = new Audio('../../media/sukses.wav');
+                audioSukses.play().catch(function () {
+                    // Diamkan saja kalau browser memblokir autoplay; bukan error fatal.
+                });
+            } catch (e) {}
+        })();
+    </script>
 <?php endif; ?>
 
 <div class="row g-3">
