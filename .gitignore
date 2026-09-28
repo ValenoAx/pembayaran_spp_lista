@@ -1,0 +1,12 @@
+# File rahasia / kredensial (JANGAN pernah di-commit)
+backend/config.php
+config_env.php
+koneksi.php
+
+# Log
+*.log
+logs/
+
+# Lain-lain
+.DS_Store
+Thumbs.db

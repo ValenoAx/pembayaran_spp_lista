@@ -1,0 +1,18 @@
+# ==== Keamanan SPP Digital ====
+# Taruh file ini di: pembayaran_spp/.htaccess
+
+# 1. Matikan tampilan daftar isi folder
+Options -Indexes
+
+# 2. Blokir folder .git (isinya seluruh source code + riwayatnya)
+RedirectMatch 404 /\.git
+
+# 3. Blokir file yang tidak boleh dibuka dari browser
+<FilesMatch "\.(log|sql|bak|zip|env|ini|sh|md)$">
+    Require all denied
+</FilesMatch>
+
+# 4. Blokir file konfigurasi/kredensial (tetap bisa di-include oleh PHP)
+<FilesMatch "^(config_env|koneksi|config)\.php$">
+    Require all denied
+</FilesMatch>
