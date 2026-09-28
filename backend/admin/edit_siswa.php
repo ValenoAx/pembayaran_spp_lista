@@ -15,10 +15,17 @@ function tahunAjaranDariMasukDanTingkat($tahun_masuk, $tingkat)
     return (int) $tahun_masuk + ((int) $tingkat - 10);
 }
 
-// Ambil NISN dari URL
+const JURUSAN_VALID = ['PPLG', 'AKL', 'APHP', 'TSM', 'TKR', 'APAT'];
+
+// Ambil NISN dari URL (pakai prepared statement)
 $nisn = $_GET['nisn'] ?? '';
-$data = mysqli_query($koneksi, "SELECT siswa.*, kelas.tingkat, kelas.jurusan as nama_jurusan FROM siswa JOIN kelas ON siswa.id_kelas = kelas.id_kelas WHERE siswa.nisn = '$nisn'");
-$siswa = mysqli_fetch_assoc($data);
+$stmt = mysqli_prepare($koneksi, "SELECT siswa.*, kelas.tingkat, kelas.jurusan AS nama_jurusan
+                                  FROM siswa JOIN kelas ON siswa.id_kelas = kelas.id_kelas
+                                  WHERE siswa.nisn = ?");
+mysqli_stmt_bind_param($stmt, "s", $nisn);
+mysqli_stmt_execute($stmt);
+$siswa = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+mysqli_stmt_close($stmt);
 
 if (!$siswa) {
     echo "<script>alert('Data siswa tidak ditemukan!'); window.location='siswa.php';</script>";
@@ -26,15 +33,15 @@ if (!$siswa) {
 }
 
 if (isset($_POST['update'])) {
-    $nis = $_POST['nis'];
-    $nama = $_POST['nama'];
-    $tingkat = $_POST['tingkat'];
-    $jurusan = $_POST['jurusan'];
-    $rombel = $_POST['rombel'];
-    $tahun_masuk = $_POST['tahun_masuk'];
-    $alamat = $_POST['alamat'];
-    $no_telp = $_POST['no_telp'];
-    $id_spp = $_POST['id_spp'];
+    $nis         = trim($_POST['nis'] ?? '');
+    $nama        = trim($_POST['nama'] ?? '');
+    $tingkat     = $_POST['tingkat'] ?? '';
+    $jurusan     = $_POST['jurusan'] ?? '';
+    $rombel      = $_POST['rombel'] ?? '';
+    $tahun_masuk = $_POST['tahun_masuk'] ?? '';
+    $alamat      = trim($_POST['alamat'] ?? '');
+    $no_telp     = trim($_POST['no_telp'] ?? '');
+    $id_spp      = $_POST['id_spp'] ?? '';
 
     if (empty($tingkat) || empty($jurusan) || empty($rombel)) {
         echo "<script>alert('Gagal! Tingkat, Jurusan, dan Rombel harus dipilih.'); window.history.back();</script>";
@@ -46,37 +53,73 @@ if (isset($_POST['update'])) {
         exit();
     }
 
-    // Cari id_kelas dengan EXACT MATCH ke tingkat + jurusan + rombel (misal "PPLG 1"),
-    // supaya siswa dipindah ke kelas paralel yang benar, bukan asal comot kelas pertama yang cocok jurusannya.
-    $jurusan_lengkap = "$jurusan $rombel";
-    $cari_kelas = mysqli_query($koneksi, "SELECT id_kelas FROM kelas WHERE tingkat = '$tingkat' AND jurusan = '$jurusan_lengkap' LIMIT 1");
+    // Validasi ketat: nilai dropdown harus salah satu dari pilihan yang sah
+    if (!in_array($tingkat, ['10', '11', '12'], true)
+        || !in_array($jurusan, JURUSAN_VALID, true)
+        || !in_array($rombel, ['1', '2', '3'], true)
+        || !ctype_digit((string) $tahun_masuk)
+        || !ctype_digit((string) $id_spp)) {
+        echo "<script>alert('Gagal! Data yang dikirim tidak valid.'); window.history.back();</script>";
+        exit();
+    }
 
-    if ($cari_kelas && mysqli_num_rows($cari_kelas) > 0) {
-        $data_kelas = mysqli_fetch_assoc($cari_kelas);
-        $id_kelas = $data_kelas['id_kelas'];
+    // Validasi panjang & isi field teks
+    if ($nis === '' || strlen($nis) > 8
+        || $nama === '' || strlen($nama) > 100
+        || $alamat === '' || strlen($alamat) > 255
+        || $no_telp === '' || strlen($no_telp) > 13) {
+        echo "<script>alert('Gagal! Periksa kembali NIS, nama, alamat, dan no. telepon.'); window.history.back();</script>";
+        exit();
+    }
+
+    $tahun_masuk = (int) $tahun_masuk;
+    $id_spp      = (int) $id_spp;
+
+    // Cari id_kelas dengan EXACT MATCH ke tingkat + jurusan + rombel (misal "PPLG 1")
+    $jurusan_lengkap = "$jurusan $rombel";
+    $stmt = mysqli_prepare($koneksi, "SELECT id_kelas FROM kelas WHERE tingkat = ? AND jurusan = ? LIMIT 1");
+    mysqli_stmt_bind_param($stmt, "ss", $tingkat, $jurusan_lengkap);
+    mysqli_stmt_execute($stmt);
+    $data_kelas = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    mysqli_stmt_close($stmt);
+
+    if ($data_kelas) {
+        $id_kelas = (int) $data_kelas['id_kelas'];
     } else {
         // Jika belum ada di database, otomatis dibuatkan oleh sistem supaya tidak error
-        $buat_kelas = mysqli_query($koneksi, "INSERT INTO kelas (tingkat, jurusan) VALUES ('$tingkat', '$jurusan_lengkap')");
-        if ($buat_kelas) {
+        $stmt = mysqli_prepare($koneksi, "INSERT INTO kelas (tingkat, jurusan) VALUES (?, ?)");
+        mysqli_stmt_bind_param($stmt, "ss", $tingkat, $jurusan_lengkap);
+        if (mysqli_stmt_execute($stmt)) {
             $id_kelas = mysqli_insert_id($koneksi);
+            mysqli_stmt_close($stmt);
         } else {
-            echo "<script>alert('Gagal memproses kelas: " . mysqli_error($koneksi) . "'); window.history.back();</script>";
+            error_log('edit_siswa (buat kelas): ' . mysqli_error($koneksi));
+            echo "<script>alert('Gagal memproses kelas. Silakan coba lagi.'); window.history.back();</script>";
             exit();
         }
     }
 
-    $query = "UPDATE siswa SET nis = '$nis', nama = '$nama', id_kelas = '$id_kelas', tahun_masuk = '$tahun_masuk', alamat = '$alamat', no_telp = '$no_telp', id_spp = '$id_spp' WHERE nisn = '$nisn'";
+    $stmt = mysqli_prepare($koneksi, "UPDATE siswa
+                                      SET nis = ?, nama = ?, id_kelas = ?, tahun_masuk = ?, alamat = ?, no_telp = ?, id_spp = ?
+                                      WHERE nisn = ?");
+    mysqli_stmt_bind_param($stmt, "ssiissis", $nis, $nama, $id_kelas, $tahun_masuk, $alamat, $no_telp, $id_spp, $nisn);
 
-    if (mysqli_query($koneksi, $query)) {
+    if (mysqli_stmt_execute($stmt)) {
+        mysqli_stmt_close($stmt);
+
         // Catat/perbarui riwayat kelas untuk tahun ajaran hasil kombinasi tingkat + tahun_masuk terbaru
         $tahun_ajaran_ini = tahunAjaranDariMasukDanTingkat($tahun_masuk, $tingkat);
-        mysqli_query($koneksi, "INSERT INTO riwayat_kelas (nisn, id_kelas, tahun_ajaran)
-                                 VALUES ('$nisn', '$id_kelas', '$tahun_ajaran_ini')
-                                 ON DUPLICATE KEY UPDATE id_kelas = VALUES(id_kelas)");
+        $stmt = mysqli_prepare($koneksi, "INSERT INTO riwayat_kelas (nisn, id_kelas, tahun_ajaran)
+                                          VALUES (?, ?, ?)
+                                          ON DUPLICATE KEY UPDATE id_kelas = VALUES(id_kelas)");
+        mysqli_stmt_bind_param($stmt, "sii", $nisn, $id_kelas, $tahun_ajaran_ini);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
 
         echo "<script>alert('Data siswa berhasil diubah!'); window.location='siswa.php';</script>";
     } else {
-        echo "<script>alert('Gagal mengubah data: " . mysqli_error($koneksi) . "'); window.history.back();</script>";
+        error_log('edit_siswa (update): ' . mysqli_error($koneksi));
+        echo "<script>alert('Gagal mengubah data. Silakan coba lagi.'); window.history.back();</script>";
     }
 }
 
@@ -110,15 +153,15 @@ if (!in_array($tahun_masuk_siswa, $daftar_tahun_masuk)) {
             <form method="POST" action="">
                 <div class="mb-3">
                     <label class="form-label">NISN (Tidak dapat diubah)</label>
-                    <input type="text" class="form-control" value="<?= $siswa['nisn']; ?>" disabled>
+                    <input type="text" class="form-control" value="<?= htmlspecialchars($siswa['nisn'], ENT_QUOTES, 'UTF-8'); ?>" disabled>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">NIS</label>
-                    <input type="text" name="nis" class="form-control" value="<?= $siswa['nis']; ?>" required maxlength="8">
+                    <input type="text" name="nis" class="form-control" value="<?= htmlspecialchars($siswa['nis'], ENT_QUOTES, 'UTF-8'); ?>" required maxlength="8">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Nama Siswa</label>
-                    <input type="text" name="nama" class="form-control" value="<?= $siswa['nama']; ?>" required>
+                    <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($siswa['nama'], ENT_QUOTES, 'UTF-8'); ?>" required>
                 </div>
 
                 <!-- Pilihan Tingkat, Jurusan, dan Rombel yang otomatis terpilih sesuai data asli -->
@@ -171,11 +214,11 @@ if (!in_array($tahun_masuk_siswa, $daftar_tahun_masuk)) {
 
                 <div class="mb-3">
                     <label class="form-label">Alamat</label>
-                    <textarea name="alamat" class="form-control" rows="3" required><?= str_replace('<', '', $siswa['alamat']); ?></textarea>
+                    <textarea name="alamat" class="form-control" rows="3" required><?= htmlspecialchars($siswa['alamat'], ENT_QUOTES, 'UTF-8'); ?></textarea>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">No. Telepon</label>
-                    <input type="text" name="no_telp" class="form-control" value="<?= $siswa['no_telp']; ?>" required maxlength="13">
+                    <input type="text" name="no_telp" class="form-control" value="<?= htmlspecialchars($siswa['no_telp'], ENT_QUOTES, 'UTF-8'); ?>" required maxlength="13">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Nominal / Tahun Ajaran SPP</label>
