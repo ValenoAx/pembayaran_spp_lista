@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'petugas') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();

@@ -1,12 +1,50 @@
 <?php
 
-session_start();
+session_start([
+    'cookie_httponly' => true,
+    'cookie_samesite' => 'Lax',
+    'use_strict_mode' => true,
+]);
 header('Content-Type: application/json');
+header('X-Content-Type-Options: nosniff');
+
+// Fungsi kecil untuk membalas error dalam format JSON lalu berhenti
+function wa_gagal($pesan, $kode = 200)
+{
+    http_response_code($kode);
+    echo json_encode(['success' => false, 'message' => $pesan]);
+    exit();
+}
 
 // Hanya boleh diakses kalau sudah login sebagai admin atau petugas
-if (!isset($_SESSION['level']) || !in_array($_SESSION['level'], ['admin', 'petugas'])) {
-    echo json_encode(['success' => false, 'message' => 'Silakan login terlebih dahulu.']);
-    exit();
+if (!isset($_SESSION['level']) || !in_array($_SESSION['level'], ['admin', 'petugas'], true)) {
+    wa_gagal('Silakan login terlebih dahulu.');
+}
+
+// Hanya menerima POST (dari tombol di halaman kuitansi)
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+    wa_gagal('Permintaan tidak valid.', 405);
+}
+
+// =====================================================
+// ANTI-CSRF: pastikan permintaan benar-benar datang dari website kita sendiri,
+// bukan dari halaman jebakan di website lain
+// =====================================================
+$sfs = $_SERVER['HTTP_SEC_FETCH_SITE'] ?? '';
+if ($sfs !== '') {
+    if ($sfs !== 'same-origin') {
+        wa_gagal('Permintaan ditolak demi keamanan.', 403);
+    }
+} else {
+    $asal = $_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? '');
+    if ($asal !== '') {
+        $host_asal = parse_url($asal, PHP_URL_HOST);
+        $port_asal = parse_url($asal, PHP_URL_PORT);
+        $alamat    = $host_asal . ($port_asal ? ':' . $port_asal : '');
+        if (!$host_asal || strcasecmp($alamat, $_SERVER['HTTP_HOST'] ?? '') !== 0) {
+            wa_gagal('Permintaan ditolak demi keamanan.', 403);
+        }
+    }
 }
 
 include '../koneksi.php'; // sesuaikan jika lokasi koneksi.php beda
@@ -16,11 +54,11 @@ include 'config.php';     // <-- token Fonnte sekarang dari sini, bukan hardcode
 // 1) AMBIL ID PEMBAYARAN YANG DIKIRIM DARI HALAMAN KUITANSI
 // =====================================================
 $ids_mentah = $_POST['ids'] ?? '';
-$daftar_id  = array_filter(array_map('intval', explode(',', $ids_mentah)));
+$daftar_id  = array_values(array_unique(array_filter(array_map('intval', explode(',', (string) $ids_mentah)))));
 
-if (count($daftar_id) === 0) {
-    echo json_encode(['success' => false, 'message' => 'ID pembayaran tidak valid.']);
-    exit();
+// Maksimal 36 transaksi sekaligus (jauh di atas pemakaian normal: 12 bulan)
+if (count($daftar_id) === 0 || count($daftar_id) > 36) {
+    wa_gagal('ID pembayaran tidak valid.');
 }
 $ids_sql = implode(',', $daftar_id);
 
@@ -46,8 +84,7 @@ while ($row = mysqli_fetch_assoc($q)) {
 }
 
 if (count($daftar) === 0) {
-    echo json_encode(['success' => false, 'message' => 'Data pembayaran tidak ditemukan.']);
-    exit();
+    wa_gagal('Data pembayaran tidak ditemukan.');
 }
 
 $d = $daftar[0];
@@ -68,8 +105,7 @@ $progress_penuh  = ($jml_lunas_tahun >= 12);
 // 4) VALIDASI NOMOR HP
 // =====================================================
 if (empty($d['no_telp'])) {
-    echo json_encode(['success' => false, 'message' => 'Nomor HP siswa ini belum diisi di database, jadi tidak bisa dikirim otomatis.']);
-    exit();
+    wa_gagal('Nomor HP siswa ini belum diisi di database, jadi tidak bisa dikirim otomatis.');
 }
 
 // Rapikan format nomor: hilangkan spasi/strip, pastikan mulai dengan 62 (bukan 0)
@@ -113,11 +149,26 @@ $pesan .= $baris_status . "\n\n";
 $pesan .= "Terima kasih.\n- SPP Digital -";
 
 // =====================================================
-// 5) KIRIM KE FONNTE
+// 5b) BATAS PENGIRIMAN: maksimal 10 pesan per menit per login,
+//     supaya tombol ini tidak bisa dipakai untuk spam / menghabiskan kuota Fonnte
+// =====================================================
+$sekarang = time();
+$_SESSION['wa_log'] = array_values(array_filter($_SESSION['wa_log'] ?? [], function ($t) use ($sekarang) {
+    return $t > $sekarang - 60;
+}));
+if (count($_SESSION['wa_log']) >= 10) {
+    wa_gagal('Terlalu sering mengirim pesan. Tunggu sebentar lalu coba lagi.', 429);
+}
+$_SESSION['wa_log'][] = $sekarang;
+
+// =====================================================
+// 6) KIRIM KE FONNTE
 // =====================================================
 $ch = curl_init(FONNTE_API_URL);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 8);   // jangan menunggu selamanya
+curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 curl_setopt($ch, CURLOPT_POSTFIELDS, [
     'target'      => $nomor_wa,
     'message'     => $pesan,
@@ -131,8 +182,9 @@ $curlErr  = curl_error($ch);
 curl_close($ch);
 
 if ($curlErr) {
-    echo json_encode(['success' => false, 'message' => 'Koneksi ke Fonnte gagal: ' . $curlErr]);
-    exit();
+    // Detail teknis hanya dicatat di log server, tidak ditampilkan ke browser
+    error_log('Fonnte curl error: ' . $curlErr);
+    wa_gagal('Koneksi ke layanan WhatsApp gagal. Coba lagi beberapa saat lagi.');
 }
 
 $result = json_decode($response, true);
@@ -140,9 +192,6 @@ $result = json_decode($response, true);
 if ($httpCode === 200 && isset($result['status']) && $result['status'] === true) {
     echo json_encode(['success' => true, 'message' => 'Kuitansi berhasil dikirim ke WhatsApp (' . $nomor_wa . ').']);
 } else {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Gagal mengirim pesan ke Fonnte.',
-        'detail'  => $result,
-    ]);
+    error_log('Fonnte gagal (HTTP ' . $httpCode . '): ' . $response);
+    wa_gagal('Gagal mengirim pesan ke layanan WhatsApp.');
 }

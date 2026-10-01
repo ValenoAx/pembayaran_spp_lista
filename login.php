@@ -1,41 +1,133 @@
 <?php
-session_start();
+// login.php membuat cookie session, jadi pengamanan cookie-nya diatur DI SINI:
+//  httponly : cookie nggak bisa dibaca JavaScript (melawan pencurian session lewat XSS)
+//  samesite : cookie nggak ikut terkirim dari website lain
+//  strict   : PHP menolak session id karangan orang lain
+session_start([
+    'cookie_httponly' => true,
+    'cookie_samesite' => 'Lax',
+    'cookie_secure'   => !empty($_SERVER['HTTPS']),
+    'use_strict_mode' => true,
+]);
+header('X-Frame-Options: SAMEORIGIN');      // halaman login nggak bisa dimasukin iframe web lain
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: same-origin');
+
 include 'koneksi.php';
+
+// =====================================================
+// PEMBATAS PERCOBAAN LOGIN (anti brute force / password spraying)
+// Percobaan GAGAL dicatat di file sementara server.
+//  - maksimal 5x gagal untuk kombinasi (perangkat + username yang sama)
+//  - maksimal 20x gagal dari satu perangkat (menahan tebak-tebakan banyak username)
+// Setelah itu dikunci 15 menit. Admin asli dari perangkat lain tetap bisa login.
+// =====================================================
+const LOGIN_MAKS_AKUN = 5;
+const LOGIN_MAKS_IP   = 20;
+const LOGIN_JENDELA   = 900; // detik (15 menit)
+
+function login_file($kunci)
+{
+    return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'spp_login_' . md5($kunci) . '.txt';
+}
+
+function login_baca($kunci)
+{
+    $f = login_file($kunci);
+    if (!is_file($f)) {
+        return [];
+    }
+    $batas = time() - LOGIN_JENDELA;
+    $waktu = array_map('intval', file($f, FILE_IGNORE_NEW_LINES) ?: []);
+    return array_values(array_filter($waktu, function ($t) use ($batas) { return $t > $batas; }));
+}
+
+function login_catat($kunci)
+{
+    $waktu   = login_baca($kunci);
+    $waktu[] = time();
+    @file_put_contents(login_file($kunci), implode("\n", $waktu), LOCK_EX);
+}
+
+function login_hapus($kunci)
+{
+    @unlink(login_file($kunci));
+}
+
+// Mengembalikan sisa detik terkunci (0 = tidak terkunci)
+function login_sisa_kunci($ip, $user)
+{
+    $sisa = 0;
+    $cek  = [['ip:' . $ip, LOGIN_MAKS_IP], ['akun:' . $ip . '|' . $user, LOGIN_MAKS_AKUN]];
+    foreach ($cek as $c) {
+        $waktu = login_baca($c[0]);
+        if (count($waktu) >= $c[1]) {
+            $sisa = max($sisa, min($waktu) + LOGIN_JENDELA - time());
+        }
+    }
+    return $sisa;
+}
 
 $error = "";
 
+// Token anti-CSRF untuk form login (dikirim lewat input tersembunyi)
+if (empty($_SESSION['csrf_login'])) {
+    $_SESSION['csrf_login'] = bin2hex(random_bytes(32));
+}
+
 if (isset($_POST['login'])) {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
+    $username = trim((string) ($_POST['username'] ?? ''));
+    $password = (string) ($_POST['password'] ?? '');
+    $ip       = $_SERVER['REMOTE_ADDR'] ?? 'x';
+    $user_key = strtolower($username);
+    $kunci_ip   = 'ip:' . $ip;
+    $kunci_akun = 'akun:' . $ip . '|' . $user_key;
 
-    // Prepared statement -> aman dari SQL Injection
-    $stmt = mysqli_prepare($koneksi, "SELECT * FROM petugas WHERE username = ?");
-    mysqli_stmt_bind_param($stmt, "s", $username);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    if (!hash_equals($_SESSION['csrf_login'], (string) ($_POST['csrf'] ?? ''))) {
+        $error = "Sesi login kedaluwarsa. Muat ulang halaman lalu coba lagi.";
+    } elseif (($sisa = login_sisa_kunci($ip, $user_key)) > 0) {
+        $error = "Terlalu banyak percobaan login. Coba lagi sekitar " . max(1, (int) ceil($sisa / 60)) . " menit lagi.";
+    } else {
+        // Prepared statement -> aman dari SQL Injection
+        $stmt = mysqli_prepare($koneksi, "SELECT * FROM petugas WHERE username = ?");
+        mysqli_stmt_bind_param($stmt, "s", $username);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row    = mysqli_fetch_assoc($result);
 
-    if ($row = mysqli_fetch_assoc($result)) {
-        // Cocokkan password dengan hash yang tersimpan di DB
-        if (password_verify($password, $row['password'])) {
+        $berhasil = false;
+        if ($row && strlen($password) <= 1000) {
+            // Cocokkan password dengan hash yang tersimpan di DB
+            $berhasil = password_verify($password, $row['password']);
+        } else {
+            // Username tidak ada: tetap hitung hash supaya waktu respons mirip,
+            // jadi orang luar tidak bisa menebak username mana yang terdaftar.
+            password_hash(substr($password, 0, 72), PASSWORD_DEFAULT);
+        }
+
+        if ($berhasil && in_array($row['level'], ['admin', 'petugas'], true)) {
+            login_hapus($kunci_akun);
+
             // Regenerate session ID -> mencegah session fixation
             session_regenerate_id(true);
+            unset($_SESSION['csrf_login']);
 
             $_SESSION['username']     = $row['username'];
             $_SESSION['nama_petugas'] = $row['nama_petugas'];
             $_SESSION['level']        = $row['level'];
 
-            if ($row['level'] == 'admin') {
+            if ($row['level'] === 'admin') {
                 header("location: backend/admin/index.php");
                 exit();
-            } else if ($row['level'] == 'petugas') {
+            } else {
                 header("location: frontend/petugas/index.php");
                 exit();
             }
         } else {
+            login_catat($kunci_ip);
+            login_catat($kunci_akun);
             $error = "Username atau password salah.";
         }
-    } else {
-        $error = "Username atau password salah.";
     }
 }
 ?>
@@ -90,6 +182,7 @@ if (isset($_POST['login'])) {
         <?php endif; ?>
 
         <form method="POST" action="">
+          <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf_login'] ?? '') ?>">
           <div class="field">
             <label for="username">Username</label>
             <div class="control">

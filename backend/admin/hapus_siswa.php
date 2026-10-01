@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
@@ -14,6 +14,6 @@ $hapus = mysqli_stmt_execute($stmt);
 if ($hapus) {
     echo "<script>alert('Data siswa berhasil dihapus!'); window.location='siswa.php';</script>";
 } else {
-    echo "<script>alert('Gagal menghapus data: " . mysqli_error($koneksi) . "'); window.location='siswa.php';</script>";
+    echo "<script>alert('Gagal menghapus data: " . keamanan_error($koneksi) . "'); window.location='siswa.php';</script>";
 }
 ?>

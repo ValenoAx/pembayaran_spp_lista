@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
@@ -30,7 +30,7 @@ if (isset($_POST['simpan'])) {
     if ($query) {
         echo "<script>alert('Data kelas berhasil ditambahkan!'); window.location='kelas.php';</script>";
     } else {
-        echo "<script>alert('Gagal menambah data: " . addslashes(mysqli_error($koneksi)) . "');</script>";
+        echo "<script>alert('Gagal menambah data: " . addslashes(keamanan_error($koneksi)) . "');</script>";
     }
 }
 

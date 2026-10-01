@@ -6,7 +6,7 @@
  * Isinya: penjelasan singkat + form "Cek Status SPP" (NISN + NIS).
  * Verifikasi & tampilan hasilnya ada di cek_spp.php.
  */
-session_start();
+require_once __DIR__ . '/keamanan.php';
 include '../koneksi.php';
 
 // Token anti-CSRF untuk form cek status

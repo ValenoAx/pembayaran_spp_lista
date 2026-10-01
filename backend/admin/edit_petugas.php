@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
@@ -7,7 +7,7 @@ if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
 include '../../koneksi.php';
 
 $id = (int) ($_GET['id'] ?? 0);
-$stmt = mysqli_prepare($koneksi, "SELECT * FROM petugas WHERE id_petugas = ?");
+$stmt = mysqli_prepare($koneksi, "SELECT * FROM petugas WHERE id_petugas = ? AND level = 'petugas'");
 mysqli_stmt_bind_param($stmt, "i", $id);
 mysqli_stmt_execute($stmt);
 $petugas = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
@@ -27,10 +27,10 @@ if (isset($_POST['update_petugas'])) {
     // Jika password diisi, update password juga (di-hash). Jika kosong, biarkan password lama.
     if (!empty($_POST['password'])) {
         $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $upd = mysqli_prepare($koneksi, "UPDATE petugas SET username=?, password=?, nama_petugas=?, level=?, password_updated_at=NOW() WHERE id_petugas=?");
+        $upd = mysqli_prepare($koneksi, "UPDATE petugas SET username=?, password=?, nama_petugas=?, level=?, password_updated_at=NOW() WHERE id_petugas=? AND level='petugas'");
         mysqli_stmt_bind_param($upd, "ssssi", $username, $password, $nama_petugas, $level, $id);
     } else {
-        $upd = mysqli_prepare($koneksi, "UPDATE petugas SET username=?, nama_petugas=?, level=? WHERE id_petugas=?");
+        $upd = mysqli_prepare($koneksi, "UPDATE petugas SET username=?, nama_petugas=?, level=? WHERE id_petugas=? AND level='petugas'");
         mysqli_stmt_bind_param($upd, "sssi", $username, $nama_petugas, $level, $id);
     }
     $update = mysqli_stmt_execute($upd);
@@ -38,7 +38,7 @@ if (isset($_POST['update_petugas'])) {
     if ($update) {
         echo "<script>alert('Data petugas berhasil diubah!'); window.location='petugas.php';</script>";
     } else {
-        echo "<script>alert('Gagal mengubah petugas: " . mysqli_error($koneksi) . "');</script>";
+        echo "<script>alert('Gagal mengubah petugas: " . keamanan_error($koneksi) . "');</script>";
     }
 }
 

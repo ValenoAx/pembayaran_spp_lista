@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
@@ -189,7 +189,7 @@ include '../components/sidebar.php';
     <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
             <h1 class="h3 fw-bold" style="color: #db2777;">Dashboard</h1>
-            <p class="text-muted mb-0">Selamat datang kembali, <strong><?php echo $_SESSION['nama_petugas'] ?? 'Administrator'; ?></strong> </p>
+            <p class="text-muted mb-0">Selamat datang kembali, <strong><?php echo htmlspecialchars($_SESSION['nama_petugas'] ?? 'Administrator'); ?></strong> </p>
         </div>
         <div>
             <span class="badge px-3 py-2 text-white shadow-sm" style="background-color: #db2777;">

@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
@@ -37,7 +37,7 @@ if (isset($_POST['simpan'])) {
         echo "<script>alert('Data SPP berhasil diperbarui!'); window.location='spp.php';</script>";
         exit();
     } else {
-        echo "<script>alert('Gagal memperbarui data: " . mysqli_error($koneksi) . "');</script>";
+        echo "<script>alert('Gagal memperbarui data: " . keamanan_error($koneksi) . "');</script>";
     }
 }
 

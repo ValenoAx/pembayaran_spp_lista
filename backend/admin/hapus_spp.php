@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
@@ -14,6 +14,6 @@ $query = mysqli_stmt_execute($stmt);
 if ($query) {
     echo "<script>alert('Data SPP berhasil dihapus!'); window.location='spp.php';</script>";
 } else {
-    echo "<script>alert('Gagal menghapus data: " . mysqli_error($koneksi) . "'); window.location='spp.php';</script>";
+    echo "<script>alert('Gagal menghapus data: " . keamanan_error($koneksi) . "'); window.location='spp.php';</script>";
 }
 ?>

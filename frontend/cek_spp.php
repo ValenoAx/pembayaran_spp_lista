@@ -9,7 +9,7 @@
  *   views/status_spp.php   -> tampilan HTML
  *   assets/css, assets/js  -> gaya dan skrip halaman
  */
-session_start();
+require_once __DIR__ . '/keamanan.php';
 require_once __DIR__ . '/../koneksi.php';
 require_once __DIR__ . '/includes/fungsi.php';
 require_once __DIR__ . '/includes/data_spp.php';
@@ -28,6 +28,12 @@ if (isset($_GET['keluar'])) {
 // ------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sekarang = time();
+
+    // Batas percobaan per perangkat (IP) - tidak bisa dilewati dengan hapus cookie
+    $sisa_ip = keamanan_ip_terkunci();
+    if ($sisa_ip > 0) {
+        balikKeDepan('Terlalu banyak percobaan dari perangkat ini. Coba lagi sekitar ' . max(1, (int) ceil($sisa_ip / 60)) . ' menit lagi.');
+    }
 
     // Token keamanan form (CSRF)
     if (!isset($_POST['csrf'], $_SESSION['csrf_cek']) || !hash_equals($_SESSION['csrf_cek'], (string) $_POST['csrf'])) {
@@ -62,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Salah: hitung percobaan, kunci kalau sudah terlalu banyak
     $_SESSION['cek_gagal'] = (int) ($_SESSION['cek_gagal'] ?? 0) + 1;
+    keamanan_catat_gagal();
     if ($_SESSION['cek_gagal'] >= GAGAL_MAKS) {
         $_SESSION['cek_kunci_sampai'] = $sekarang + KUNCI_DETIK;
         $_SESSION['cek_gagal'] = 0;

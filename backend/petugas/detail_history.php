@@ -1,12 +1,12 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'petugas') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
 }
 include '../../koneksi.php';
 
-$nisn = mysqli_real_escape_string($koneksi, $_GET['nisn']);
+$nisn = mysqli_real_escape_string($koneksi, $_GET['nisn'] ?? '');
 
 // Ambil data siswa + tingkat kelasnya (BUKAN lewat id_spp lagi, karena sekarang bisa multi-tahun)
 $q_siswa = mysqli_query($koneksi, "

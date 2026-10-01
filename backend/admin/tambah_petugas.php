@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
@@ -19,7 +19,7 @@ if (isset($_POST['simpan'])) {
     if (mysqli_stmt_execute($stmt)) {
         echo "<script>alert('Data petugas berhasil ditambahkan!'); window.location='petugas.php';</script>";
     } else {
-        echo "<script>alert('Gagal menambah petugas: " . mysqli_error($koneksi) . "');</script>";
+        echo "<script>alert('Gagal menambah petugas: " . keamanan_error($koneksi) . "');</script>";
     }
 }
 

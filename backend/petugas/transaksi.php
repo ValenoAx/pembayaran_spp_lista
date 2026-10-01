@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'petugas') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
@@ -21,12 +21,17 @@ if (!isset($_SESSION['id_petugas'])) {
     $username_sess = mysqli_real_escape_string($koneksi, $_SESSION['username']);
     $q_petugas = mysqli_query($koneksi, "SELECT id_petugas FROM petugas WHERE username = '$username_sess' LIMIT 1");
     $d_petugas = mysqli_fetch_assoc($q_petugas);
-    $_SESSION['id_petugas'] = $d_petugas['id_petugas'] ?? 1;
+    if (!$d_petugas) {
+        session_destroy();
+        echo "<script>alert('Akun petugas tidak ditemukan. Silakan login ulang.'); window.location='../../login.php';</script>";
+        exit();
+    }
+    $_SESSION['id_petugas'] = $d_petugas['id_petugas'];
 }
 
 if (isset($_POST['bayar'])) {
-    $nisn  = mysqli_real_escape_string($koneksi, $_POST['nisn']);
-    $tahun = (int) $_POST['tahun'];
+    $nisn  = mysqli_real_escape_string($koneksi, $_POST['nisn'] ?? '');
+    $tahun = (int) ($_POST['tahun'] ?? 0);
     $daftar_bulan_dipilih = isset($_POST['bulan']) && is_array($_POST['bulan']) ? $_POST['bulan'] : [];
 
     if (count($daftar_bulan_dipilih) === 0) {
@@ -81,6 +86,14 @@ if (isset($_POST['bayar'])) {
     // ---------------------------------------------------------------
     try {
         mysqli_begin_transaction($koneksi);
+        // Kunci baris siswa ini sampai commit/rollback, jadi klik ganda / dua request bersamaan
+        // dipaksa antre. Setelah dapat giliran, baca ulang bulan yang sudah lunas.
+        mysqli_query($koneksi, "SELECT nisn FROM siswa WHERE nisn = '$nisn' FOR UPDATE");
+        $sudah_lunas_cek = [];
+        $q_cek_ulang = mysqli_query($koneksi, "SELECT bulan_dibayar FROM pembayaran WHERE nisn = '$nisn' AND tahun_dibayar = '$tahun'");
+        while ($cu = mysqli_fetch_assoc($q_cek_ulang)) {
+            $sudah_lunas_cek[] = $cu['bulan_dibayar'];
+        }
 
         foreach ($daftar_bulan_dipilih as $bulan_ke) {
             $bulan_ke = (int) $bulan_ke;

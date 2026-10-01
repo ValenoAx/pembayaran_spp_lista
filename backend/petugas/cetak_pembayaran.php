@@ -2,7 +2,7 @@
 // LETAKKAN FILE INI DI: pembayaran_spp/backend/petugas/cetak_pembayaran.php
 // (timpa/replace file yang lama)
 
-session_start();
+require_once __DIR__ . '/keamanan.php';
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'petugas') {
     echo "<script>alert('Silakan login terlebih dahulu!'); window.location='../../login.php';</script>";
     exit();
